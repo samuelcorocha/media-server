@@ -1,0 +1,15 @@
+# === Estado de runtime — NÃO versionar (restaurado via ./restore.sh) ===
+/config/
+/data/
+
+# === Ambiente local / segredos ===
+.env
+
+# === Artefatos de backup ===
+/backups/
+*.tar.gz
+*.tar.zst
+
+# === Lixo de sistema ===
+.directory
+*.log

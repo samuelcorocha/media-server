@@ -1,0 +1,132 @@
+services:
+
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${CONFIG_PATH}/jellyfin:/config
+      - ${ROOT_PATH}/media:/data/media
+    ports:
+      - ${JELLYFIN_PORT}:8096
+    restart: unless-stopped
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${CONFIG_PATH}/sonarr:/config
+      - ${ROOT_PATH}:/data
+    ports:
+      - ${SONARR_PORT}:8989
+    restart: unless-stopped
+    depends_on:
+      - qbittorrent
+      - prowlarr
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${CONFIG_PATH}/radarr:/config
+      - ${ROOT_PATH}:/data
+    ports:
+      - ${RADARR_PORT}:7878
+    restart: unless-stopped
+    depends_on:
+      - qbittorrent
+      - prowlarr
+
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${CONFIG_PATH}/prowlarr:/config
+    ports:
+      - ${PROWLARR_PORT}:9696
+    restart: unless-stopped
+    depends_on:
+      - flaresolverr
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - WEBUI_PORT=${QBIT_WEBUI_PORT}
+    volumes:
+      - ${CONFIG_PATH}/qbittorrent:/config
+      - ${ROOT_PATH}/torrents:/data/torrents
+    ports:
+      - ${QBIT_WEBUI_PORT}:8080
+      - 6881:6881
+      - 6881:6881/udp
+    restart: unless-stopped
+
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - ${CONFIG_PATH}/jellyseerr:/app/config
+    ports:
+      - ${JELLYSEERR_PORT}:5055
+    restart: unless-stopped
+    depends_on:
+      - jellyfin
+      - sonarr
+
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    environment:
+      - LOG_LEVEL=info
+      - TZ=${TZ}
+    ports:
+      - ${FLARESOLVERR_PORT}:8191
+    restart: unless-stopped
+
+  recyclarr:
+    image: ghcr.io/recyclarr/recyclarr:latest
+    container_name: recyclarr
+    user: "${PUID}:${PGID}"
+    volumes:
+      - ${CONFIG_PATH}/recyclarr:/config
+    environment:
+      - TZ=${TZ}
+    restart: unless-stopped
+    
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    restart: unless-stopped
+    ports:
+      - ${BAZARR_PORT}:6767
+    volumes:
+      - ${CONFIG_PATH}/bazarr:/config
+      - ${ROOT_PATH}:/data
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    depends_on:
+      - sonarr
+      - radarr
