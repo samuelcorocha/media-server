@@ -35,7 +35,25 @@ tar \
 SIZE="$(du -h "$OUT" | cut -f1)"
 echo "==> OK ($SIZE)."
 
-# Mantém apenas os 5 backups mais recentes
+# Mantém apenas os 5 backups locais mais recentes
 ls -1t "${BACKUP_DIR%/}"/media-server-config-*.tar.gz 2>/dev/null | tail -n +6 | xargs -r rm -f
-echo "==> Backups disponíveis:"
+
+# Envio opcional pra nuvem (ex.: Google Drive via rclone).
+# Defina RCLONE_REMOTE, ex.:  RCLONE_REMOTE="gdrive:media-server-backups"
+if [[ -n "${RCLONE_REMOTE:-}" ]]; then
+  if command -v rclone >/dev/null 2>&1; then
+    echo "==> Enviando para ${RCLONE_REMOTE} via rclone..."
+    rclone copy "$OUT" "$RCLONE_REMOTE" --progress
+    # Mantém só os 5 backups mais recentes também no remoto
+    mapfile -t REMOTE_OLD < <(rclone lsf "$RCLONE_REMOTE" --include 'media-server-config-*.tar.gz' 2>/dev/null | sort -r | tail -n +6)
+    for f in "${REMOTE_OLD[@]:-}"; do
+      [[ -n "$f" ]] && rclone deletefile "${RCLONE_REMOTE%/}/$f" 2>/dev/null || true
+    done
+    echo "==> Upload concluído."
+  else
+    echo "AVISO: RCLONE_REMOTE definido mas rclone não está instalado; pulei o upload." >&2
+  fi
+fi
+
+echo "==> Backups locais disponíveis:"
 ls -1t "${BACKUP_DIR%/}"/media-server-config-*.tar.gz 2>/dev/null
