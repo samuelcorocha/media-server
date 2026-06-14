@@ -58,6 +58,14 @@ rclone config        # crie um remote chamado 'gdrive' (tipo: drive / Google Dri
 | Jellyseerr   | http://localhost:5055   |
 | Bazarr       | http://localhost:6767   |
 | FlareSolverr | http://localhost:8191   |
+| Homepage     | http://localhost:3000   |
+| Cleanuparr   | http://localhost:11011  |
+
+> **VueTorrent**: o qBittorrent usa a WebUI alternativa VueTorrent (instalada via `DOCKER_MODS`
+> e já ativada em `qBittorrent.conf`). Em uma máquina nova, depois de restaurar o backup já vem ligada.
+>
+> **Cleanuparr**: na primeira vez, abra `:11011` e conecte Sonarr/Radarr/qBittorrent (URL interna
+> `http://sonarr:8989` etc. + API key) para ativar a limpeza automática de downloads travados.
 
 ## Estrutura de dados
 ```

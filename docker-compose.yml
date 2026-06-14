@@ -71,6 +71,7 @@ services:
       - PGID=${PGID}
       - TZ=${TZ}
       - WEBUI_PORT=${QBIT_WEBUI_PORT}
+      - DOCKER_MODS=ghcr.io/gabe565/linuxserver-mod-vuetorrent:latest
     volumes:
       - ${CONFIG_PATH}/qbittorrent:/config
       - ${ROOT_PATH}/torrents:/data/torrents
@@ -130,3 +131,35 @@ services:
     depends_on:
       - sonarr
       - radarr
+
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - HOMEPAGE_ALLOWED_HOSTS=*
+    volumes:
+      - ${CONFIG_PATH}/homepage:/app/config
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - ${HOMEPAGE_PORT}:3000
+    restart: unless-stopped
+
+  cleanuparr:
+    image: ghcr.io/cleanuparr/cleanuparr:latest
+    container_name: cleanuparr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${CONFIG_PATH}/cleanuparr:/config
+    ports:
+      - ${CLEANUPARR_PORT}:11011
+    restart: unless-stopped
+    depends_on:
+      - sonarr
+      - radarr
+      - qbittorrent
