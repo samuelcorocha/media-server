@@ -27,7 +27,25 @@ O backup leva só o **estado das apps** (`config/` + `.env`), sem cache/logs/met
 regeneráveis. **Não** inclui sua mídia (`data/media`) nem torrents — isso é arquivo grande,
 faça backup à parte se quiser.
 
-> Dica: rode `./backup.sh` periodicamente (ou agende no cron) e guarde o tarball fora do PC.
+> Dica: o `bootstrap.sh` já instala um **systemd timer** que roda o backup aos **sábados 14h**
+> com upload pro Google Drive (`RCLONE_REMOTE=gdrive:media-server-backups`). Tem `Persistent=true`,
+> então se o PC estiver desligado no horário, o backup roda assim que você ligar/logar.
+
+### Agendamento (systemd timer)
+Instalado automaticamente pelo `bootstrap.sh` a partir de `systemd/`. Comandos:
+```bash
+systemctl --user list-timers media-server-backup.timer   # próxima execução
+systemctl --user start media-server-backup.service       # rodar agora
+journalctl --user -u media-server-backup.service          # logs
+```
+
+### Google Drive (rclone) — passo manual após formatar
+O backup sobe pro Drive via `rclone`, mas a credencial do Google **não** vai pro repo nem pro
+backup. Numa máquina nova, configure uma vez:
+```bash
+sudo dnf install -y rclone
+rclone config        # crie um remote chamado 'gdrive' (tipo: drive / Google Drive)
+```
 
 ## Acessos (portas padrão, veja `.env`)
 | Serviço      | URL                     |

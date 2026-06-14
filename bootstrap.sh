@@ -36,6 +36,19 @@ echo "==> Baixando imagens e subindo containers..."
 docker compose pull
 docker compose up -d
 
+# Instala o timer systemd de backup (sábados 14h, com catch-up), se os units existirem.
+if [[ -d systemd ]] && command -v systemctl >/dev/null 2>&1; then
+  echo "==> Instalando timer de backup (systemd --user)..."
+  REPO_DIR="$(pwd)"
+  UNIT_DIR="${HOME}/.config/systemd/user"
+  mkdir -p "$UNIT_DIR"
+  sed "s#__MEDIA_SERVER_DIR__#${REPO_DIR}#g" systemd/media-server-backup.service > "${UNIT_DIR}/media-server-backup.service"
+  cp systemd/media-server-backup.timer "${UNIT_DIR}/media-server-backup.timer"
+  systemctl --user daemon-reload
+  systemctl --user enable --now media-server-backup.timer
+  echo "    >> Backup agendado. NÃO esquece de configurar o rclone: rclone config (remote 'gdrive')."
+fi
+
 echo ""
 echo "==> Pronto! Containers no ar. Se este é um host novo SEM config restaurado,"
 echo "    rode ./restore.sh ANTES de configurar as apps na mão."

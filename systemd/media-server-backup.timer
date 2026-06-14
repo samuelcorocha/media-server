@@ -1,0 +1,10 @@
+[Unit]
+Description=Agenda semanal do backup do media-server (sábados 14h, com catch-up)
+
+[Timer]
+OnCalendar=Sat 14:00
+Persistent=true
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target

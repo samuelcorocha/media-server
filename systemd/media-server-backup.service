@@ -1,0 +1,11 @@
+[Unit]
+Description=Backup do media-server (config + .env) com upload pro Google Drive
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+# __MEDIA_SERVER_DIR__ é substituído pelo bootstrap.sh na instalação.
+WorkingDirectory=__MEDIA_SERVER_DIR__
+Environment=RCLONE_REMOTE=gdrive:media-server-backups
+ExecStart=__MEDIA_SERVER_DIR__/backup.sh
